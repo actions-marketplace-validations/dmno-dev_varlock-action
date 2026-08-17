@@ -2,17 +2,23 @@ import {
   describe, it, expect, beforeEach, afterEach, vi,
 } from 'vitest';
 import { execSync } from 'child_process';
-import { writeFileSync } from 'fs';
+import {
+  writeFileSync, mkdirSync, mkdtempSync, rmSync,
+} from 'fs';
 import { join } from 'path';
+import { tmpdir } from 'os';
 
 // Import the actual functions from the worker code
 import {
   checkVarlockInstalled,
   checkForEnvFiles,
+  findLocalVarlockBinary,
   runVarlockLoad,
   setEnvironmentVariables,
   outputJsonBlob,
   getInputs,
+  countErrors,
+  formatValidationErrorMessage,
 } from '../src/index';
 
 // Mock the GitHub Actions core module for testing
@@ -72,6 +78,41 @@ describe('Varlock GitHub Action - Testing Actual Worker Functions', () => {
       expect(typeof result).toBe('boolean');
       // We can't easily mock execSync in this context, so we just verify the function
       // returns a boolean and doesn't throw an error
+    });
+  });
+
+  describe('findLocalVarlockBinary', () => {
+    // The platform-appropriate shim bun/npm would create in node_modules/.bin.
+    // On Windows the action probes varlock.cmd/.exe/varlock; elsewhere just varlock.
+    const shimName = process.platform === 'win32' ? 'varlock.cmd' : 'varlock';
+    let tmpRoot: string;
+
+    beforeEach(() => {
+      tmpRoot = mkdtempSync(join(tmpdir(), 'varlock-action-test-'));
+    });
+
+    afterEach(() => {
+      rmSync(tmpRoot, { recursive: true, force: true });
+    });
+
+    it('finds a shim installed in an ancestor node_modules/.bin', () => {
+      const binDir = join(tmpRoot, 'node_modules', '.bin');
+      mkdirSync(binDir, { recursive: true });
+      const shimPath = join(binDir, shimName);
+      writeFileSync(shimPath, '');
+
+      // Work from a nested package dir to exercise the upward walk
+      const workingDir = join(tmpRoot, 'packages', 'some-pkg');
+      mkdirSync(workingDir, { recursive: true });
+
+      expect(findLocalVarlockBinary(workingDir)).toBe(shimPath);
+    });
+
+    it('returns undefined when no local shim exists', () => {
+      const workingDir = join(tmpRoot, 'packages', 'some-pkg');
+      mkdirSync(workingDir, { recursive: true });
+
+      expect(findLocalVarlockBinary(workingDir)).toBeUndefined();
     });
   });
 
@@ -423,6 +464,40 @@ PORT=3000`;
       // The function doesn't return anything, but we can verify it was called
       // by checking that no errors were thrown
       expect(true).toBe(true);
+    });
+  });
+
+  describe('validation error helpers', () => {
+    it('should count structured validation errors from env graph', () => {
+      const errors = {
+        root: ['Schema file is invalid'],
+        configItems: {
+          PORT: 'Unable to coerce string to number',
+        },
+      };
+
+      expect(countErrors(errors)).toBe(2);
+    });
+
+    it('should format structured validation errors for setFailed', () => {
+      const errors = {
+        root: ['Schema file is invalid'],
+        configItems: {
+          PORT: 'Unable to coerce string to number',
+        },
+      };
+
+      expect(formatValidationErrorMessage(2, errors)).toBe(
+        'Found 2 validation error(s):\n  - Schema file is invalid\n  - PORT: Unable to coerce string to number',
+      );
+    });
+
+    it('should fall back to stderr details when structured errors are unavailable', () => {
+      const stderr = 'Invalid items:\n- PORT: Unable to coerce string to number';
+
+      expect(formatValidationErrorMessage(1, undefined, stderr)).toBe(
+        'Found 1 validation error(s):\n\nInvalid items:\n- PORT: Unable to coerce string to number',
+      );
     });
   });
 
