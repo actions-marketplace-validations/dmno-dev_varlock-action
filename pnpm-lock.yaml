@@ -31,8 +31,8 @@ importers:
         specifier: ^5.9.2
         version: 5.9.2
       varlock:
-        specifier: ^1.7.2
-        version: 1.7.2
+        specifier: ^1.16.1
+        version: 1.16.1
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@24.3.0)
@@ -579,6 +579,7 @@ packages:
 
   glob@10.4.5:
     resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   is-fullwidth-code-point@3.0.0:
@@ -743,6 +744,7 @@ packages:
   source-map@0.8.0-beta.0:
     resolution: {integrity: sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA==}
     engines: {node: '>= 8'}
+    deprecated: The work that was done in this beta branch won't be included in future versions
 
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
@@ -854,9 +856,9 @@ packages:
   universal-user-agent@6.0.1:
     resolution: {integrity: sha512-yCzhz6FN2wU1NiiQRogkTQszlQSlpWaw8SvVegAc+bDxbzHgh1vX8uIe8OYyMH6DwH+sdTJsgMl36+mSMdRJIQ==}
 
-  varlock@1.7.2:
-    resolution: {integrity: sha512-ZiyKMPW/NStvroygZynKSukVfq1auC3Nq06Eu3qkrMVaEPeSeI64TbWE5QCW0Eo9pWlu/as/Yl+OnhL8f/guRw==}
-    engines: {bun: '>=1.3.3', node: '>=22'}
+  varlock@1.16.1:
+    resolution: {integrity: sha512-n3s+uPnn5nxHvPGhtLIMj7gC0Xd9Bje4smRSRcLsI2p11VPhs1e/ZfcJcfOhyNH5yp1RwHszJ8QR3x5eTGF7Zg==}
+    engines: {bun: '>=1.3.3', node: '>=22.3.0'}
     hasBin: true
 
   vite-node@3.2.4:
@@ -1671,7 +1673,7 @@ snapshots:
 
   universal-user-agent@6.0.1: {}
 
-  varlock@1.7.2: {}
+  varlock@1.16.1: {}
 
   vite-node@3.2.4(@types/node@24.3.0):
     dependencies:
